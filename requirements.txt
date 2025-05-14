@@ -1,2 +1,2 @@
-pyTelegramBotAPI
-yt-dlp
+aiogram==2.25.2
+yt-dlp==2024.04.09
