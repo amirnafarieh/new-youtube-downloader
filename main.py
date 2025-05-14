@@ -10,7 +10,7 @@ from aiogram.dispatcher import FSMContext
 import yt_dlp
 import asyncio
 
-API_TOKEN = 'YOUR_BOT_TOKEN'
+API_TOKEN = os.environ.get('YOUR_BOT_TOKEN', 'YOUR_BOT_TOKEN')
 CHANNEL_ID = -1002134567890  # ID کانال @amirnafarieh_co
 CHANNEL_USERNAME = 'amirnafarieh_co'
 
