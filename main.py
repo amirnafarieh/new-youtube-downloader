@@ -10,7 +10,7 @@ from aiogram.dispatcher import FSMContext
 import yt_dlp
 import asyncio
 
-API_TOKEN = os.environ.get('YOUR_BOT_TOKEN', 'YOUR_BOT_TOKEN')
+API_TOKEN = os.environ.get('YOUR_BOT_TOKEN')
 CHANNEL_ID = -1002134567890  # ID کانال @amirnafarieh_co
 CHANNEL_USERNAME = 'amirnafarieh_co'
 
@@ -50,7 +50,7 @@ async def start_cmd(message: types.Message):
 async def handle_youtube_link(message: types.Message, state: FSMContext):
     url = message.text.strip()
 
-    markup = InlineKeyboardMarkup()
+    markup = InlineKeyboardMarkup(row_width=2)
     markup.add(
         InlineKeyboardButton("🎧 MP3 (128kbps)", callback_data=f"mp3|{url}"),
         InlineKeyboardButton("📹 MP4 (360p)", callback_data=f"360p|{url}"),
