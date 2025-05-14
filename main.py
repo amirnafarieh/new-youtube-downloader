@@ -1,3 +1,8 @@
+import os
+
+API_TOKEN = os.environ.get("YOUR_BOT_TOKEN")
+
+
 import logging
 import os
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
