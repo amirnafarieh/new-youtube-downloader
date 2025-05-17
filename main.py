@@ -99,16 +99,23 @@ async def download_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "quiet": True,
         "geo_bypass": True,
         "cookiefile": "cookies.txt",
+        "merge_output_format": "mp4",
         "headers": {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
         }
     }
 
+    # انتخاب postprocessor بر اساس فرمت
     if quality == "mp3":
         ydl_opts["postprocessors"] = [{
             "key": "FFmpegExtractAudio",
             "preferredcodec": "mp3",
             "preferredquality": "128"
+        }]
+    else:
+        ydl_opts["postprocessors"] = [{
+            "key": "FFmpegVideoConvertor",
+            "preferedformat": "mp4"
         }]
 
     try:
@@ -117,6 +124,8 @@ async def download_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             filename = ydl.prepare_filename(info)
             if quality == "mp3":
                 filename = filename.rsplit(".", 1)[0] + ".mp3"
+            else:
+                filename = filename.rsplit(".", 1)[0] + ".mp4"
 
         await context.bot.send_document(chat_id=query.from_user.id, document=open(filename, "rb"), caption="✅ فایل شما آماده است!")
         os.remove(filename)
