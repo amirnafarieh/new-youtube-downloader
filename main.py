@@ -6,13 +6,11 @@ from telegram.error import TelegramError
 import yt_dlp
 import asyncio
 
-# تنظیم لاگ
 logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s",
     level=logging.INFO
 )
 
-# خواندن توکن و اطلاعات کانال از متغیرهای محیطی
 TOKEN = os.environ.get("BOT_TOKEN")
 CHANNEL = os.environ.get("CHANNEL_USERNAME") or os.environ.get("CHANNEL_ID")
 
@@ -22,7 +20,6 @@ if not TOKEN:
 if CHANNEL and not CHANNEL.startswith("@") and not CHANNEL.startswith("-100"):
     CHANNEL = f"@{CHANNEL}"
 
-# تابع بررسی عضویت
 async def is_user_subscribed(user_id: int, bot) -> bool:
     if not CHANNEL:
         return True
@@ -33,7 +30,6 @@ async def is_user_subscribed(user_id: int, bot) -> bool:
         logging.warning(f"❗️Membership check failed: {e}")
         return False
 
-# /start command
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     if not await is_user_subscribed(user.id, context.bot):
@@ -48,7 +44,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     await update.message.reply_text("سلام! 🎬 لینک ویدیوی یوتیوب را بفرست تا دانلود کنم.")
 
-# پیام حاوی لینک یوتیوب
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     text = update.message.text.strip()
@@ -69,7 +64,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ]
     await update.message.reply_text("✅ کیفیت مورد نظر را انتخاب کنید:", reply_markup=InlineKeyboardMarkup(buttons))
 
-# بررسی مجدد عضویت با دکمه "عضو شدم"
 async def check_joined(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -79,7 +73,6 @@ async def check_joined(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         await query.answer("❌ هنوز عضو کانال نشدی!", show_alert=True)
 
-# دانلود و ارسال فایل
 async def download_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -103,7 +96,12 @@ async def download_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ydl_opts = {
         "format": format_map.get(quality, "22"),
         "outtmpl": "%(id)s.%(ext)s",
-        "quiet": True
+        "quiet": True,
+        "geo_bypass": True,
+        "cookiefile": "cookies.txt",
+        "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+        }
     }
 
     if quality == "mp3":
@@ -127,7 +125,6 @@ async def download_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         logging.exception("Download error")
         await query.edit_message_text(f"❌ خطا در دانلود: {e}")
 
-# اجرای ربات
 if __name__ == "__main__":
     app = ApplicationBuilder().token(TOKEN).build()
 
