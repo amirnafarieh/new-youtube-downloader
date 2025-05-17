@@ -1,4 +1,5 @@
 import os
+import re
 import logging
 from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, CallbackQueryHandler, ContextTypes, filters
@@ -19,6 +20,9 @@ if not TOKEN:
 
 if CHANNEL and not CHANNEL.startswith("@") and not CHANNEL.startswith("-100"):
     CHANNEL = f"@{CHANNEL}"
+
+def clean_title(title):
+    return re.sub(r'[\\/*?:"<>|]', "", title).strip()
 
 async def is_user_subscribed(user_id: int, bot) -> bool:
     if not CHANNEL:
@@ -93,9 +97,11 @@ async def download_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "4k": "bestvideo[height<=2160]+bestaudio/best/best"
     }
 
+    ext = "mp3" if quality == "mp3" else "mp4"
+
     ydl_opts = {
         "format": format_fallback.get(quality, "best"),
-        "outtmpl": "%(id)s.%(ext)s",
+        "outtmpl": "%(title)s.%(ext)s",
         "quiet": True,
         "geo_bypass": True,
         "cookiefile": "cookies.txt",
@@ -105,7 +111,6 @@ async def download_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         }
     }
 
-    # انتخاب postprocessor بر اساس فرمت
     if quality == "mp3":
         ydl_opts["postprocessors"] = [{
             "key": "FFmpegExtractAudio",
@@ -121,11 +126,8 @@ async def download_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = await asyncio.to_thread(ydl.extract_info, url, download=True)
-            filename = ydl.prepare_filename(info)
-            if quality == "mp3":
-                filename = filename.rsplit(".", 1)[0] + ".mp3"
-            else:
-                filename = filename.rsplit(".", 1)[0] + ".mp4"
+            title = clean_title(info.get("title", "video"))
+            filename = f"{title}.{ext}"
 
         await context.bot.send_document(chat_id=query.from_user.id, document=open(filename, "rb"), caption="✅ فایل شما آماده است!")
         os.remove(filename)
