@@ -85,16 +85,16 @@ async def download_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await query.edit_message_text("⏳ در حال آماده‌سازی فایل...")
 
-    format_map = {
+    format_fallback = {
         "mp3": "bestaudio/best",
-        "360p": "18",
-        "720p": "22",
-        "1080p": "137+140",
-        "4k": "313+140"
+        "360p": "bestvideo[height<=360]+bestaudio/best/best",
+        "720p": "bestvideo[height<=720]+bestaudio/best/best",
+        "1080p": "bestvideo[height<=1080]+bestaudio/best/best",
+        "4k": "bestvideo[height<=2160]+bestaudio/best/best"
     }
 
     ydl_opts = {
-        "format": format_map.get(quality, "22"),
+        "format": format_fallback.get(quality, "best"),
         "outtmpl": "%(id)s.%(ext)s",
         "quiet": True,
         "geo_bypass": True,
